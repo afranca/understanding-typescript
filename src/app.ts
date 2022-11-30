@@ -48,7 +48,7 @@ class ProjectInput {
     }
 
     private configure(){
-        this.formElement.addEventListener("submit", this.submitHandler.bind(this));
+        this.formElement.addEventListener("submit", this.submitHandler);
     }
 
     private attach(){
