@@ -1,5 +1,6 @@
 // Project State Management
 class ProjectState {
+    private listeners: Function[] = [];
     private projects: any[] = [];
     private static instance: ProjectState;
 
@@ -21,6 +22,17 @@ class ProjectState {
             people: numOfPeople
         };
         this.projects.push(newProject);
+
+        for (const listenerFn of this.listeners){
+            // slice makes a copy of the original array
+            // otherwise it will pass a pointer to the original array
+            // allowing it to be changed somewhere else
+            listenerFn(this.projects.slice());
+        }
+    }
+
+    addListener(listenerFn: Function){
+        this.listeners.push(listenerFn);
     }
 }
 
@@ -80,17 +92,33 @@ class ProjectList{
     templateElement: HTMLTemplateElement;    
     hostElement: HTMLDivElement;  
     sectionElement: HTMLElement;
+    assignedProjects: any[];
 
     constructor(private type: 'active' | 'finished'){
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
         this.hostElement = document.getElementById('app')! as HTMLDivElement;
+        this.assignedProjects = [];
 
         const importedNode = document.importNode(this.templateElement.content, true);
         this.sectionElement = importedNode.firstElementChild as HTMLElement;
         this.sectionElement.id = `${this.type}-projects`;
-        this.attach();
-        this.renderContent();
         
+        projectState.addListener( (projects: any[]) => {
+            this.assignedProjects = projects;
+            this.renderProjects();
+        });
+
+        this.attach();
+        this.renderContent();        
+    }
+
+    private renderProjects(){
+        const listEl = document.getElementById(`${this.type}-project-list`)! as HTMLUListElement;
+        for(const prjItem of this.assignedProjects){
+            const listItem = document.createElement('li');
+            listItem.textContent = prjItem.title;
+            listEl.appendChild(listItem);
+        }
     }
 
     private renderContent(){
