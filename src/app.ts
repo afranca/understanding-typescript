@@ -17,10 +17,10 @@ class Project {
     };
 }
 
-
+type Listener = (items: Project[]) => void;
 // Project State Management
 class ProjectState {
-    private listeners: Function[] = [];
+    private listeners: Listener[] = [];
     private projects: Project[] = [];
     private static instance: ProjectState;
 
@@ -53,7 +53,7 @@ class ProjectState {
         }
     }
 
-    addListener(listenerFn: Function){
+    addListener(listenerFn: Listener){
         this.listeners.push(listenerFn);
     }
 }
@@ -114,7 +114,7 @@ class ProjectList{
     templateElement: HTMLTemplateElement;    
     hostElement: HTMLDivElement;  
     sectionElement: HTMLElement;
-    assignedProjects: any[];
+    assignedProjects: Project[];
 
     constructor(private type: 'active' | 'finished'){
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
@@ -125,7 +125,7 @@ class ProjectList{
         this.sectionElement = importedNode.firstElementChild as HTMLElement;
         this.sectionElement.id = `${this.type}-projects`;
         
-        projectState.addListener( (projects: any[]) => {
+        projectState.addListener( (projects: Project[]) => {
             this.assignedProjects = projects;
             this.renderProjects();
         });
