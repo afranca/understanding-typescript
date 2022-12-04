@@ -1,11 +1,17 @@
+// Statuses for Projects
+enum ProjectStatus {
+    Active,
+    Finished
+}
+
 // Project Type
 class Project {
-
     constructor(
         public id: string, 
         public title: string,
         public description: string,
-        public numberOfPeople: number
+        public numberOfPeople: number,
+        public status: ProjectStatus
      ){
 
     };
@@ -33,7 +39,9 @@ class ProjectState {
             Math.random.toString(),
             title,
             description,
-            numOfPeople);
+            numOfPeople,
+            ProjectStatus.Active
+            );
         
         this.projects.push(newProject);
 
