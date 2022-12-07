@@ -1,3 +1,15 @@
+// Drag & Drop Interfaces
+interface Draggable {
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget{
+    dragOverHandler(event: DragEvent): void;
+    dropHandler(event: DragEvent): void;
+    dragLeaveHandler(event: DragEvent): void;
+}
+
 // Statuses for Projects
 enum ProjectStatus {
     Active,
@@ -151,7 +163,7 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 }
 
 // Project Item class
-class ProjecItem extends Component<HTMLUListElement, HTMLLIElement>{
+class ProjecItem extends Component<HTMLUListElement, HTMLLIElement> implements Draggable{
     private project: Project;   
 
     get persons(){
@@ -172,8 +184,17 @@ class ProjecItem extends Component<HTMLUListElement, HTMLLIElement>{
         this.renderContent();
     }
 
+    @autobind
+    dragStartHandler(event: DragEvent): void {
+        console.log("dragStartHandler :: Method not implemented."+event.target);
+    }
+    dragEndHandler(_: DragEvent): void {
+        console.log("dragEndHandler :: Method not implemented.");
+    }
+
     configure(): void {
-        //throw new Error("Method not implemented.");
+        this.element.addEventListener('dragstart', this.dragStartHandler);
+        this.element.addEventListener('dragend', this.dragEndHandler);
     }
     renderContent(): void {
         this.element.querySelector('h2')!.textContent = this.project.title;
@@ -183,7 +204,7 @@ class ProjecItem extends Component<HTMLUListElement, HTMLLIElement>{
 }
 
 // Project List class
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList extends Component<HTMLDivElement, HTMLElement>  {
 
     assignedProjects: Project[];
 
@@ -194,7 +215,7 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
         this.configure();
         this.renderContent();        
     }
-
+    
     configure(): void { 
         projectState.addListener( (projects: Project[]) => {
             const relevantProjects = projects.filter( (prj) => {
