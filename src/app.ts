@@ -59,7 +59,7 @@ class ProjectState extends State<Project>{
 
     addProject(title: string, description: string, numOfPeople: number){
         const newProject = new Project(
-            Math.random.toString(),
+            Math.random().toString(),
             title,
             description,
             numOfPeople,
@@ -186,8 +186,11 @@ class ProjecItem extends Component<HTMLUListElement, HTMLLIElement> implements D
 
     @autobind
     dragStartHandler(event: DragEvent): void {
-        console.log("dragStartHandler :: Method not implemented."+event.target);
+        console.log("dragStartHandler ");
+        event.dataTransfer!.setData('text/plain', this.project.id);
+        event.dataTransfer!.effectAllowed = 'move'; //could be also 'copy'
     }
+    
     dragEndHandler(_: DragEvent): void {
         console.log("dragEndHandler :: Method not implemented.");
     }
@@ -204,7 +207,7 @@ class ProjecItem extends Component<HTMLUListElement, HTMLLIElement> implements D
 }
 
 // Project List class
-class ProjectList extends Component<HTMLDivElement, HTMLElement>  {
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget {
 
     assignedProjects: Project[];
 
@@ -216,7 +219,37 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>  {
         this.renderContent();        
     }
     
+    @autobind
+    dragOverHandler(event: DragEvent): void {        
+        console.log("dragOverHandler");
+        // tests whether the data format is the expected type
+        // for instance, images would not be allowed here
+        if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain'){
+            // Default is not allow drag & drop, therefore the
+            // preventDefault() is required in the DragOver handler
+            event.preventDefault();
+            const listEl = this.element.querySelector('ul')!;
+            listEl.classList.add('droppable'); //defined in css
+        }
+
+
+    }
+    @autobind
+    dropHandler(event: DragEvent): void {
+        console.log(event.dataTransfer!.getData('text/plain'));
+    }
+    @autobind
+    dragLeaveHandler(_: DragEvent): void {
+        console.log("dragLeaveHandler");
+        const listEl = this.element.querySelector('ul')!;
+        listEl.classList.remove('droppable'); //defined in css
+    }
+
     configure(): void { 
+        this.element.addEventListener('dragover', this.dragOverHandler);
+        this.element.addEventListener('dragleave', this.dragLeaveHandler);
+        this.element.addEventListener('drop', this.dropHandler);
+
         projectState.addListener( (projects: Project[]) => {
             const relevantProjects = projects.filter( (prj) => {
                 if (this.type === 'active'){
